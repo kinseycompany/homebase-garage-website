@@ -1,0 +1,9 @@
+.DS_Store
+.wrangler/
+node_modules/
+.vscode/
+.idea/
+*.log
+.env
+.env.*
+!.env.example

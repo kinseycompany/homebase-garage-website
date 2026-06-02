@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homebase | Interactive Siteplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a368;
+    --dark: #2d3436;
+    --available: #2e7d32;
+    --available-glow: #4caf50;
+    --sold: #9e9e9e;
+    --reserved: #e8a317;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #f4f1ec;
+    color: var(--dark);
+    padding: 2rem 1rem;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  header.head { text-align: center; margin-bottom: 1.5rem; }
+  header.head h1 { margin: 0 0 .35rem; font-size: 2rem; }
+  header.head p { margin: 0; color: #666; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .siteplan-stage {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e0d9cc;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  }
+  .siteplan-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hotspot-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hotspot {
+    position: absolute;
+    pointer-events: auto;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background .15s, box-shadow .15s, transform .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,0);
+    font-weight: 700;
+    font-size: .75rem;
+  }
+  .hotspot.sold {
+    background: rgba(158,158,158,.35);
+    border: 1px solid rgba(70,70,70,.45);
+  }
+  .hotspot.sold:hover {
+    background: rgba(158,158,158,.55);
+  }
+  .hotspot.available {
+    background: rgba(76,175,80,.55);
+    border: 2px solid #2e7d32;
+    box-shadow: 0 0 0 0 rgba(76,175,80,.7);
+    animation: pulse 2s infinite;
+  }
+  .hotspot.available:hover {
+    background: rgba(76,175,80,.8);
+    transform: scale(1.05);
+  }
+  .hotspot.reserved {
+    background: rgba(232,163,23,.45);
+    border: 1px solid #b67d10;
+  }
+  .hotspot.editing {
+    outline: 2px dashed #d63031;
+    background: rgba(214,48,49,.2) !important;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76,175,80,.6); }
+    70% { box-shadow: 0 0 0 14px rgba(76,175,80,0); }
+    100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+  }
+
+  /* Sidebar */
+  aside {
+    background: #fff;
+    border: 1px solid #e0d9cc;
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    position: sticky;
+    top: 1rem;
+  }
+  aside h2 {
+    margin: 0 0 .75rem;
+    font-size: 1.1rem;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: .4rem;
+  }
+  .legend { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+  .legend-row { display: flex; align-items: center; gap: .5rem; font-size: .9rem; }
+  .swatch { width: 18px; height: 18px; border-radius: 3px; }
+  .swatch.av { background: rgba(76,175,80,.6); border: 2px solid #2e7d32; }
+  .swatch.so { background: rgba(158,158,158,.45); border: 1px solid #555; }
+  .swatch.re { background: rgba(232,163,23,.5); border: 1px solid #b67d10; }
+
+  .summary {
+    background: #f9f5ee;
+    border-radius: 6px;
+    padding: .75rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  .summary .big { font-size: 2rem; font-weight: 700; color: var(--gold); display: block; }
+  .summary .lbl { font-size: .85rem; color: #666; }
+
+  .unit-card {
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+    min-height: 140px;
+  }
+  .unit-card .unit-num { font-size: 1.5rem; font-weight: 700; }
+  .unit-card .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: .75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .pill.av { background: #2e7d32; color: #fff; }
+  .pill.so { background: #757575; color: #fff; }
+  .pill.re { background: #b67d10; color: #fff; }
+  .unit-card dl { margin: .75rem 0 0; }
+  .unit-card dt { font-size: .75rem; text-transform: uppercase; color: #888; letter-spacing: .04em; }
+  .unit-card dd { margin: 0 0 .5rem; font-size: .95rem; font-weight: 500; }
+  .unit-card .empty { color: #aaa; font-style: italic; padding: 1rem 0; }
+
+  .cta-btn {
+    display: inline-block; margin-top: .75rem;
+    background: var(--gold); color: #fff; padding: .55rem 1rem;
+    border-radius: 4px; text-decoration: none; font-weight: 600;
+    font-size: .9rem;
+  }
+  .cta-btn:hover { background: #b18d52; }
+
+  /* Editor */
+  .editor {
+    margin-top: 1.5rem; padding: 1rem;
+    background: #fff8e1; border: 1px dashed #b67d10;
+    border-radius: 8px;
+  }
+  .editor.hidden { display: none; }
+  .editor h3 { margin: 0 0 .5rem; font-size: 1rem; }
+  .editor p { margin: .25rem 0; font-size: .85rem; }
+  .editor textarea { width: 100%; height: 100px; font-family: monospace; font-size: .75rem; }
+  .editor button { margin-top: .5rem; }
+  .toggle-edit {
+    position: fixed; bottom: 1rem; right: 1rem;
+    background: #333; color: #fff; border: 0;
+    padding: .5rem .75rem; border-radius: 4px; cursor: pointer;
+    font-size: .8rem; opacity: .6;
+  }
+  .toggle-edit:hover { opacity: 1; }
+
+  .editor.active .hotspot { color: rgba(255,255,255,.95) !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <h1>Homebase — Site Plan</h1>
+    <p>Click any unit for details. Available units pulse in green.</p>
+  </header>
+
+  <div class="layout">
+    <div class="siteplan-stage" id="stage">
+      <img src="assets/siteplan/siteplan-master.jpg" alt="Homebase site plan" class="siteplan-img" id="basemap">
+      <div class="hotspot-layer" id="hotspots"></div>
+    </div>
+
+    <aside>
+      <div class="summary">
+        <span class="big" id="available-count">3</span>
+        <span class="lbl">units available of 33</span>
+      </div>
+
+      <h2>Legend</h2>
+      <div class="legend">
+        <div class="legend-row"><span class="swatch av"></span> Available</div>
+        <div class="legend-row"><span class="swatch re"></span> Reserved</div>
+        <div class="legend-row"><span class="swatch so"></span> Sold</div>
+      </div>
+
+      <h2>Unit Details</h2>
+      <div class="unit-card" id="unit-card">
+        <p class="empty">Click a unit on the site plan to see details.</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="editor hidden" id="editor">
+    <h3>Hotspot Editor (dev mode)</h3>
+    <p>Click a hotspot above, then drag in image to reposition (TODO). For now: edit JSON below and click Apply. Coordinates are in original image pixels (image is 800×1035).</p>
+    <textarea id="editor-json"></textarea>
+    <div>
+      <button onclick="applyEdits()">Apply</button>
+      <button onclick="copyEdits()">Copy JSON</button>
+    </div>
+  </div>
+</div>
+
+<button class="toggle-edit" onclick="toggleEditor()">edit mode</button>
+
+<script>
+  // ============================================================
+  // Unit data — single source of truth
+  // status: 'available' | 'sold' | 'reserved'
+  // ============================================================
+  // Hotspot coords are in original image px (800x1035); auto-scaled on render.
+  const IMG_W = 800, IMG_H = 1035;
+
+  const UNITS = {
+    // Right column (1–17)
+    "1":  { status: "sold",     x: 575, y: 330, w: 90, h: 35 },
+    "2":  { status: "sold",     x: 575, y: 365, w: 90, h: 35 },
+    "3":  { status: "sold",     x: 575, y: 400, w: 90, h: 35 },
+    "4":  { status: "sold",     x: 575, y: 435, w: 90, h: 35 },
+    "5":  { status: "sold",     x: 575, y: 470, w: 90, h: 35 },
+    "6":  { status: "sold",     x: 575, y: 505, w: 90, h: 35 },
+    "7":  { status: "available",x: 575, y: 540, w: 90, h: 35 },
+    "8":  { status: "sold",     x: 575, y: 575, w: 90, h: 35 },
+    "9":  { status: "sold",     x: 575, y: 610, w: 90, h: 35 },
+    "10": { status: "sold",     x: 575, y: 645, w: 90, h: 35 },
+    "11": { status: "sold",     x: 575, y: 680, w: 90, h: 35 },
+    "12": { status: "sold",     x: 575, y: 715, w: 90, h: 35 },
+    "13": { status: "sold",     x: 575, y: 750, w: 90, h: 35 },
+    "14": { status: "sold",     x: 575, y: 785, w: 90, h: 35 },
+    "15": { status: "sold",     x: 575, y: 820, w: 90, h: 35 },
+    "16": { status: "sold",     x: 575, y: 855, w: 90, h: 35 },
+    "17": { status: "sold",     x: 575, y: 890, w: 90, h: 35 },
+
+    // Middle column (18–29)
+    "18": { status: "sold",     x: 395, y: 375, w: 110, h: 38 },
+    "19": { status: "sold",     x: 395, y: 413, w: 110, h: 38 },
+    "20": { status: "sold",     x: 395, y: 451, w: 110, h: 38 },
+    "21": { status: "sold",     x: 395, y: 489, w: 110, h: 38 },
+    "22": { status: "available",x: 395, y: 527, w: 110, h: 38 },
+    "23": { status: "sold",     x: 395, y: 565, w: 110, h: 38 },
+    "24": { status: "sold",     x: 395, y: 603, w: 110, h: 38 },
+    "25": { status: "sold",     x: 395, y: 641, w: 110, h: 38 },
+    "26": { status: "sold",     x: 395, y: 679, w: 110, h: 38 },
+    "27": { status: "sold",     x: 395, y: 717, w: 110, h: 38 },
+    "28": { status: "sold",     x: 395, y: 755, w: 110, h: 38 },
+    "29": { status: "sold",     x: 395, y: 793, w: 110, h: 38 },
+
+    // Bottom row (30–34) — note: only 33 total units per Adam; "34" may be infra/office.
+    // Including all 5 numbers but you can flip statuses or remove.
+    "30": { status: "sold",     x: 540, y: 920, w: 130, h: 45 },
+    "31": { status: "sold",     x: 503, y: 920, w: 37,  h: 45 },
+    "32": { status: "available",x: 466, y: 920, w: 37,  h: 45 },
+    "33": { status: "sold",     x: 429, y: 920, w: 37,  h: 45 },
+    "34": { status: "sold",     x: 392, y: 920, w: 37,  h: 45 }
+  };
+
+  // Optional metadata per unit (size, price, etc.) — fill in as you have data
+  const UNIT_INFO = {
+    // Example structure:
+    // "7":  { size: "30' × 50'", sqft: 1500, ceiling: "18'", price: "$185,000" },
+    // "22": { size: "30' × 60'", sqft: 1800, ceiling: "18'", price: "$215,000" },
+    // "32": { size: "20' × 40'", sqft: 800,  ceiling: "16'", price: "$125,000" }
+  };
+
+  // ============================================================
+  const stage = document.getElementById('stage');
+  const layer = document.getElementById('hotspots');
+  const card  = document.getElementById('unit-card');
+  const img   = document.getElementById('basemap');
+  let editMode = false;
+
+  function render() {
+    layer.innerHTML = '';
+    const stageW = stage.clientWidth;
+    const scale = stageW / IMG_W;
+    Object.entries(UNITS).forEach(([num, u]) => {
+      const el = document.createElement('div');
+      el.className = `hotspot ${u.status}`;
+      el.dataset.unit = num;
+      el.style.left   = (u.x * scale) + 'px';
+      el.style.top    = (u.y * scale) + 'px';
+      el.style.width  = (u.w * scale) + 'px';
+      el.style.height = (u.h * scale) + 'px';
+      el.textContent = num;
+      el.title = `Unit ${num} — ${u.status}`;
+      el.addEventListener('click', () => showUnit(num));
+      layer.appendChild(el);
+    });
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const av = Object.values(UNITS).filter(u => u.status === 'available').length;
+    document.getElementById('available-count').textContent = av;
+  }
+
+  function showUnit(num) {
+    const u = UNITS[num];
+    const info = UNIT_INFO[num] || {};
+    const statusClass = u.status === 'available' ? 'av' : u.status === 'reserved' ? 're' : 'so';
+    const statusLabel = u.status[0].toUpperCase() + u.status.slice(1);
+    let html = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:.5rem;">
+        <span class="unit-num">Unit ${num}</span>
+        <span class="pill ${statusClass}">${statusLabel}</span>
+      </div>
+      <dl>
+    `;
+    if (info.size)    html += `<dt>Size</dt><dd>${info.size}</dd>`;
+    if (info.sqft)    html += `<dt>Square Feet</dt><dd>${info.sqft.toLocaleString()} sq ft</dd>`;
+    if (info.ceiling) html += `<dt>Ceiling Height</dt><dd>${info.ceiling}</dd>`;
+    if (info.price)   html += `<dt>Price</dt><dd>${info.price}</dd>`;
+    if (info.notes)   html += `<dt>Notes</dt><dd>${info.notes}</dd>`;
+    html += `</dl>`;
+    if (u.status === 'available') {
+      html += `<a href="index.html#contact" class="cta-btn">Inquire about Unit ${num}</a>`;
+    } else if (u.status === 'reserved') {
+      html += `<p style="color:#b67d10; font-size:.85rem; margin-top:.5rem;">This unit is currently reserved. Contact us to be added to the waitlist.</p>`;
+    }
+    card.innerHTML = html;
+  }
+
+  // Editor helpers
+  function toggleEditor() {
+    editMode = !editMode;
+    const ed = document.getElementById('editor');
+    ed.classList.toggle('hidden', !editMode);
+    document.body.classList.toggle('editor', editMode);
+    document.body.classList.toggle('active', editMode);
+    if (editMode) {
+      document.getElementById('editor-json').value = JSON.stringify(UNITS, null, 2);
+    }
+  }
+  function applyEdits() {
+    try {
+      const data = JSON.parse(document.getElementById('editor-json').value);
+      Object.keys(UNITS).forEach(k => delete UNITS[k]);
+      Object.assign(UNITS, data);
+      render();
+    } catch (e) { alert('Bad JSON: ' + e.message); }
+  }
+  function copyEdits() {
+    navigator.clipboard.writeText(document.getElementById('editor-json').value);
+  }
+
+  // Boot
+  if (img.complete) render(); else img.addEventListener('load', render);
+  window.addEventListener('resize', render);
+</script>
+</body>
+</html>
