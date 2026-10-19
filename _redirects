@@ -1,0 +1,6 @@
+# Old Squarespace URLs still indexed by Google -> 301 to the matching section
+/contact-us   /#contact        301
+/garages      /#availability   301
+/locations    /#location       301
+/about        /#faq            301
+/faq          /#faq            301

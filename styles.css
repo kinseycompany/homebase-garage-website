@@ -1243,3 +1243,14 @@ img {
 .form-status[data-kind="error"]   { color: #c0392b; }
 .form-status[data-kind="success"] { color: #2e7d32; }
 .form-status[data-kind="pending"] { color: var(--color-slate); }
+
+
+/* ===== v2 sales additions ===== */
+.hero .urgency-badge{display:inline-block;margin-bottom:1rem}
+.why-own{background:#f7f5f2}
+.faq h3{margin-top:1.5rem;font-size:1.1rem}
+.sticky-cta{display:none}
+@media (max-width:768px){
+  .sticky-cta{display:block;position:fixed;left:0;right:0;bottom:0;z-index:999;padding:14px 16px;text-align:center;font-weight:600;color:#fff;background:#E67E22;text-decoration:none;box-shadow:0 -2px 12px rgba(0,0,0,.2)}
+  body{padding-bottom:52px}
+}

@@ -149,11 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Unit data
     var UNITS = {
-        '12': {
-            id: '12',
-            label: 'Unit 12',
-            dims: "18.75' × 40'",
-            sqft: '750 SF',
+        '16': {
+            id: '16',
+            label: 'Unit 16',
+            dims: "19' × 40'",
+            sqft: '760 SF',
             price: '$150,000',
             building: 'A (West)'
         },
@@ -353,3 +353,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 })();
+
+
+// v2: "Request Tour of Unit X" pre-selects that unit in the form
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest && e.target.closest('.reserve-btn[data-unit]');
+    if (!btn) return;
+    var sel = document.getElementById('interest');
+    if (sel) sel.value = btn.getAttribute('data-unit');
+    var msg = document.getElementById('message');
+    if (msg && !msg.value) msg.focus({preventScroll: true});
+});
