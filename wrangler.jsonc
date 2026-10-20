@@ -5,6 +5,10 @@
   "compatibility_date": "2026-06-02",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  "vars": {
+    "CONTACT_FROM": "Homebase Website <noreply@homebasegarage.com>",
+    "CONTACT_TO": "sales@homebasegarage.com"
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
