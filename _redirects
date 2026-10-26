@@ -4,3 +4,6 @@
 /locations    /#location       301
 /about        /#faq            301
 /faq          /#faq            301
+/favicon.ico  /favicon.png  301
+/home         /               301
+/contact      /#contact       301
