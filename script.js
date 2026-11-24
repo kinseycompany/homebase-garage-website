@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (contactForm) {
         const statusEl = contactForm.querySelector('.form-status');
         const submitBtn = contactForm.querySelector('button[type="submit"]');
+        // Anti-spam: stamp when the form loaded and prove JavaScript ran
+        const tField = contactForm.querySelector('input[name="_t"]');
+        const jsField = contactForm.querySelector('input[name="_js"]');
+        if (tField) tField.value = String(Date.now());
+        if (jsField) jsField.value = 'hb-' + (Date.now() % 9973).toString(36);
         const setStatus = (msg, kind) => {
             if (!statusEl) return;
             statusEl.textContent = msg;
